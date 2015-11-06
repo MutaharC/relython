@@ -55,7 +55,7 @@ def relython(inp):
             print('Directional Simulation not yet implemented\n')
             return None
         else:
-            print('Invalid or unsupported solver: {0}\n'.format(inp['solver']))
+            print('Invalid/unsupported solver: {0}\n'.format(inp['solver']))
             return None
 
         if inp['showresults'] == 1:
@@ -69,20 +69,20 @@ def relython(inp):
         return err
 
 
-# Called from terminal with no arguments
+# Called with no arguments - process all files in input directory
 path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'input')
 if (len(argv) == 1) and (__name__ == '__main__'):              
-    # Read any files in the working directory which could be input files
-    input_files = [fname for fname in os.listdir(path) if 'input' in fname]
+    # Read all files in the input directory which could be input files
+    input_files = [os.path.join(path, fname) for fname in os.listdir(path)]
     for input_file in input_files:
         print('\nProcessing {0}...'.format(input_file))
         try:
-            input_dict = io.loadfile(os.path.join(path, input_file))
+            input_dict = io.loadfile(input_file)
             relython(input_dict)
         except Exception as e:
             print('* Error processing {0}'.format(os.path.join(path, input_file), e))
             continue
-# Called from terminal with arguments
+# Called with arguments
 elif  __name__ == '__main__':
     for input_file in argv[1:]:
         print('\nProcessing {0}...'.format(input_file))
@@ -94,4 +94,5 @@ elif  __name__ == '__main__':
             continue
 # Imported by other module or interpreter 
 else:
-    print('relython v{0}'.format(__version__))
+    pass
+    #print('relython v{0}'.format(__version__))

@@ -2,6 +2,7 @@
 
 from numpy import dot, array, eye
 from numpy.linalg import cholesky
+from multiprocessing import Pool, cpu_count
 from nataf import nataf
 
 def corrmat_u(cmat_x, xdists):
@@ -9,14 +10,22 @@ def corrmat_u(cmat_x, xdists):
     Convert X-space correlation matrix to U-space correlation matrix.
     """
 
+    cpus = max(1, cpu_count()-1) # Don't use every core!
+    rho_dict = {}
+
     n = len(xdists)
     cmat_u = eye(n)
     if cmat_x.sum() > n: 
         # Generate correlation matrix in standard normal space, if necessary
-        for i in range(n):
-            for j in range(i+1, n, 1):
-                rho_prime = nataf(xdists[i], xdists[j], cmat_x[i, j])['x']
-                cmat_u[i, j], cmat_u[j, i] = rho_prime, rho_prime
+        if __name__ == 'ftrans':
+            # Parallelise the calculation of equivalent rhos 
+            pool = Pool(cpus)
+            rho_dict = {(i, j): pool.apply_async(nataf, [xdists[i], xdists[j], cmat_x[i, j]])
+                                for i in range(n) for j in range(i+1, n, 1)}
+            for ij in rho_dict.keys():
+                rho_ij = rho_dict[ij].get(timeout=60)['x']
+                cmat_u[ij], cmat_u[ij[::-1]] = rho_ij, rho_ij
+
     return cmat_u
 
 

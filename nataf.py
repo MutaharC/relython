@@ -18,7 +18,7 @@ def integrand(rho1, x1x2_norm, uu):
     return x1x2_norm * mvn2
 
 
-def nataf(var1, var2, rho, limu=5, n=500):
+def nataf(var1, var2, rho, limu=6, n=100):
     """
     Solve numerically for rho_prime in U-space to get rho in X-space.
     """
