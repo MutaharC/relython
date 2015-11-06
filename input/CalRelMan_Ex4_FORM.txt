@@ -1,0 +1,28 @@
+{
+"notes":       "CalRel manual example 4:\n\tX1~lognormal(mu=500,sig=100);\n\tX2~lognormal(mu=2000,sig=400);\n\tX3~uniform(mu=5, sig=0.5)\n\tX4~lognormal(mu=450,sig=90);\n\tX5~lognormal(mu=1800, sig=360);\n\tX6~uniform(mu=4.5,sig=0.45)\n\tcorr(X1, X2)=0.3\n\tcorr(X1,X3)=0.2\n\tcorr(X2, X3)=0.2\n\tcorr(X4,X5)=0.3\n\tcorr(X4, X6)=0.2\n\tcorr(X5,X6)=0.2",
+"g":           "1.7 - x2/(1000.0*x3) - (x1/(200.0*x3))**2 - x5/(1000.0*x6) - (x4/(200*x6))**2",
+"vars": [
+               {"name": "x1", "dist": "logn", "params": [6.1949977, 0.1980422], "desc": "X1"},
+               {"name": "x2", "dist": "logn", "params": [7.5812921, 0.1980422], "desc": "X2"},
+               {"name": "x3", "dist": "unif", "params": [4.1339746, 5.8660254], "desc": "X3"},
+               {"name": "x4", "dist": "logn", "params": [6.0896372, 0.1980422], "desc": "X4"},
+               {"name": "x5", "dist": "logn", "params": [7.4759315, 0.1980422], "desc": "X5"},
+               {"name": "x6", "dist": "unif", "params": [3.7205771, 5.2794228], "desc": "X6"}
+         ],
+"correlation": [
+                ["x1", "x2", 0.3], 
+                ["x1", "x3", 0.2],
+                ["x2", "x3", 0.2],
+                ["x4", "x5", 0.3], 
+                ["x4", "x6", 0.2],
+                ["x5", "x6", 0.2]
+                ],
+"transform":   "Nataf",
+"solver":      "HLRF",
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
+"eps":         1.0e-8,
+"maxitr":      100,
+"curvcheck":   0,
+"showresults": 1
+}

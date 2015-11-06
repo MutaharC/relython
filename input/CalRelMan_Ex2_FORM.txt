@@ -1,5 +1,5 @@
 {
-"notes":       "CalRel example: X1 lognormal with mu=500, sig=100; \n X2 lognormal with mu=2000, sig=400; X3 uniform with mu=5, sig=0.5",
+"notes":       "CalRel example 2: \n\tX1~lognormal(mu=500,sig=100);\n\tX2~lognormal(mu=2000, sig=400);\n\tX3~uniform(mu=5, sig=0.5)",
 "g":           "1 - x2/(1000.0*x3) - (x1/(200.0*x3))**2",
 "vars": [
                {"name": "x1", "dist": "logn", "params": [6.1949977, 0.1980422], "desc": "X1"},
@@ -13,10 +13,10 @@
                 ],
 "transform":   "Nataf",
 "solver":      "HLRF",
-"tol":         1.0e-6,
-"ftol":        1.0e-6,
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      2000,
+"maxitr":      100,
 "curvcheck":   0,
 "showresults": 1
 }

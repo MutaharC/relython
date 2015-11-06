@@ -6,6 +6,19 @@ from scipy.optimize import minimize
 
 eul = 0.577215664901532
 
+
+def unconv(mu_un, sig_un):
+    """
+    Convert mean and standard deviation of uniform distribution
+    to lower and upper bounds of the underlying uniform distribution.
+    """
+
+    a = mu_un - sqrt(3)*sig_un
+    b = 2*mu_un - a
+
+    return a, b
+
+
 def lnconv(mu_ln, sig_ln, base='e'):
     """
     Convert mean and standard deviation of lognormal distribution

@@ -1,0 +1,19 @@
+{
+"notes":       "CalRel manual example 1:\n\tx1~uniform(0, 100)\n\tx2~expon(0.05)\n\tx1 and x2 independent", 
+"g":           "x1 - x2",
+"vars": [
+               {"name": "x1", "dist": "unif", "params": [0, 100], "desc": "X1"},
+               {"name": "x2", "dist": "expo", "params": [0.05], "desc": "X2"}
+         ],
+"correlation": [
+                ["x1", "x2", 0.0] 
+                ],
+"transform":   "Nataf",
+"solver":      "HLRF",
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
+"eps":         1.0e-8,
+"maxitr":      2000,
+"curvcheck":   0,
+"showresults": 1
+}

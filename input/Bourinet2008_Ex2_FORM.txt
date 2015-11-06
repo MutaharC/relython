@@ -2,18 +2,18 @@
 "notes":       "Bourinet (2008) example 2: R lognormal with mu=5, sig=5; S Frechet with mu=1, sig=1",
 "g":           "R - S",
 "vars": [
-               {"name": "R", "dist": "logn", "params": [1.2628643221541278, 0.83255461115769769], "desc": "Resistance"},
-               {"name": "S", "dist": "frch", "params": [2.529935,  0.676404, 0], "desc": "Load"}
+               {"name": "R", "dist": "logn", "params": [1.262864, 0.832554], "desc": "Resistance"},
+               {"name": "S", "dist": "frch", "params": [2.529935, 0.676404, 0], "desc": "Load"}
          ],
 "correlation": [
                 ["R", "S", 0.5]
                 ],
 "transform":   "Nataf",
-"solver":      "SLSQP",
+"solver":      "HLRF",
 "tol":         1.0e-6,
 "ftol":        1.0e-6,
 "eps":         1.0e-8,
-"maxitr":      2000,
+"maxitr":      100,
 "curvcheck":   0,
 "showresults": 1
 }

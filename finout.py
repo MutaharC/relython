@@ -90,8 +90,8 @@ def pprint(inp, cmat_x, cmat_u, out):
     vars_m = [var['name'] for var in inp['vars']]
     nvars = len(vars_m)
     
-    formheader = '\n{0}\n={2}=\n= FORM analysis{3}=\n={2}=\n{1}'.format('='*80, '='*80, ' '*78, ' '*64)
-    mcheader = '\n{0}\n={2}=\n= Monte Carlo reliability analysis{3}=\n={2}=\n{1}'.format('='*80, '='*80, ' '*78, ' '*45)
+    formheader = '\n{0}\n={2}=\n= FORM analysis{3}=\n={2}=\n{1}'.format('='*79, '='*79, ' '*77, ' '*63)
+    mcheader = '\n{0}\n={2}=\n= Monte Carlo reliability analysis{3}=\n={2}=\n{1}'.format('='*79, '='*79, ' '*77, ' '*44)
     if inp['solver'] in ['HLRF', 'SLSQP']:
         pp = [formheader]
         subhead = '\n\n FORM results\n {0}'.format('-'*12)
@@ -99,12 +99,13 @@ def pprint(inp, cmat_x, cmat_u, out):
         pp = [mcheader]
         subhead = '\n\n MC results\n {0}'.format('-'*10)
     pp.append('\n\n Calculation Notes\n {0}\n {1}'.format('-'*17, inp['notes']))
-    pp.append('\n\n Limit state function\n {0}\n g({1}) = {2}'.format('-'*20,','.join(vars_m), inp['g']))
-    pp.append('\n\n {0:4s} {1:<14s} {2:>4s} {3:>10s} {4:>10s} {5:>10s} {6:>10s} {7:>10s}\n {8}'.format('Var','Description','Dist','Param1','Param2','Param3','Mean','StdDev','-'*79))
+    pp.append('\n\n Limit state function\n {0}\n '.format('-'*20))
+    pp.append(llfmt('g({0}) = {1}'.format(','.join(vars_m), inp['g'])))
+    pp.append('\n\n {0:4s}{1:<14s}{2:>4s}{3:>10s}{4:>10s}{5:>10s}{6:>10s}{7:>10s}\n {8}'.format('Var','Description','Dist','Param1','Param2','Param3','Mean','StdDev','-'*72))
     for i, var in enumerate(inp['vars']): 
         vparams = [var['params'][j] if j<len(var['params']) else None for j in range(3)]
-        pp.append('\n {0:4s} {1:<14s} {2:>4s} {3}'.format(var['name'], var['desc'], var['dist'], ' '.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams)))
-        pp.append(' {0:10.2e} {1:10.2e}'.format(out['vars'][i].mu, out['vars'][i].sig))
+        pp.append('\n {0:4s}{1:<14s}{2:>4s}{3}'.format(var['name'], var['desc'], var['dist'], ''.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams)))
+        pp.append('{0:10.2e}{1:10.2e}'.format(out['vars'][i].mu, out['vars'][i].sig))
     
     if nvars <= 10: 
         pp.append('\n\n Correlation matrix in X-space\n {0}\n    {1}'.format(29*'-', ''.join('{0:>7s}'.format(var['name']) for var in inp['vars'])))
@@ -118,9 +119,9 @@ def pprint(inp, cmat_x, cmat_u, out):
         pp.append('\n\n No correlation matrices shown - number of variables > 10')
     
     pp.append(subhead)
-    pp.append('\n {0:12s}{1:10.4f}\n {2:12s}{3:10.3e}\n {4:12s}{5:>10s}\n {6:12s}{7:>10s}\n {8:12s}{9:10d}\n {10:12s}{11:10.3e}\n'.format(
+    pp.append('\n {0:12s}{1:10.6f}\n {2:12s}{3:10.4e}\n {4:12s}{5:>10s}\n {6:12s}{7:>10s}\n {8:12s}{9:10d}\n {10:11s}{11:-10.4e}\n'.format(
           'Beta:', out['beta'], 'Pf:', out['Pf'], 'Transform:', inp['transform'], 'Solver:', inp['solver'], 'N_iter:', int(out['nitr']), 
-          'g(x_beta):', out['g_beta']))
+          'g(x*):', out['g_beta']))
     
     if inp['solver'] in ['HLRF', 'SLSQP']:
         # FORM sensitivities
@@ -128,5 +129,22 @@ def pprint(inp, cmat_x, cmat_u, out):
         for i, var in enumerate(inp['vars']):
            lineout = [var['name'], out['x_beta'][i], out['u_beta'][i], out['alpha'][i], out['alpha'][i]**2*100]
            pp.append('\n {0:4s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
-        pp.append('\n\n{0}\n'.format('='*80))
+        pp.append('\n\n{0}\n'.format('='*79))
     return ''.join(pp)
+
+
+def llfmt(longline, maxlen=78):
+    """
+    Format a long output line to fit within 79 character limit.
+    """
+
+    out = ''
+    if len(longline) < maxlen:
+        return longline
+    else:
+        lstr = list(longline)
+        spcix = [i for i, char in enumerate(lstr) if char==' ']
+        for i in range(1, len(spcix), 1):
+            if spcix[i]%maxlen < spcix[i-1]%maxlen:
+                lstr[spcix[i-1]] = '\n '
+    return ''.join(lstr)
