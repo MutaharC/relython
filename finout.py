@@ -31,10 +31,11 @@ def validinp(inp):
     non_dists = [var['dist'] for var in inp['vars'] if var['dist']+'.py' not in
                     os.listdir(os.path.join(modpath, 'dists'))]
     if not set(vars_g).issubset(set(vars_m)):
-        errmsgs.append('* Warning: variables in g-function not defined in vars')
+        errmsgs.append("""\n*** Warning: variables in g-function not defined in vars""")
     if len(non_dists)>0:
-        print ("""* Warning: unsupported distribution(s) specified: 
-		    {0}""".format(', '.join(unsupp_dists)))
+        errmsgs.append("""\n*** Unsupported distribution(s) specified: {0}""".format(', '.join(unsupp_dists)))
+    if inp['solver'].upper() in ['CMC','ISMC','DSIM'] and 'seed' not in inp.keys():
+        errmsgs.append("""\n*** Specify seed in input file for CMC, ISMC and DSIM solvers""") 
     return errmsgs
 
 
@@ -97,7 +98,7 @@ def pprint(inp, cmat_x, cmat_u, out):
         subhead = '\n\n FORM results\n {0}'.format('-'*12)
     else:
         pp = [mcheader]
-        subhead = '\n\n MC results\n {0}'.format('-'*10)
+        subhead = '\n\n Monte Carlo results\n {0}'.format('-'*19)
     pp.append('\n\n Calculation Notes\n {0}\n {1}'.format('-'*17, inp['notes']))
     pp.append('\n\n Limit state function\n {0}\n '.format('-'*20))
     pp.append(llfmt('g({0}) = {1}'.format(','.join(vars_m), inp['g'])))
@@ -119,17 +120,20 @@ def pprint(inp, cmat_x, cmat_u, out):
         pp.append('\n\n No correlation matrices shown - number of variables > 10')
     
     pp.append(subhead)
-    pp.append('\n {0:12s}{1:10.6f}\n {2:12s}{3:10.4e}\n {4:12s}{5:>10s}\n {6:12s}{7:>10s}\n {8:12s}{9:10d}\n {10:11s}{11:-10.4e}\n'.format(
-          'Beta:', out['beta'], 'Pf:', out['Pf'], 'Transform:', inp['transform'], 'Solver:', inp['solver'], 'N_iter:', int(out['nitr']), 
-          'g(x*):', out['g_beta']))
-    
+    pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n {8:14s}{9:11d}\n'.format(
+          'Beta:', out['beta'], 'Pf:', out['Pf'], 'Transform:', inp['transform'], 'Solver:', inp['solver'], 'N_iter:', int(out['nitr'])))
     if inp['solver'] in ['HLRF', 'SLSQP']:
-        # FORM sensitivities
+        # FORM - additional info
+        pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*)', out['g_beta']))
         pp.append('\n {0:4s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*48))
         for i, var in enumerate(inp['vars']):
            lineout = [var['name'], out['x_beta'][i], out['u_beta'][i], out['alpha'][i], out['alpha'][i]**2*100]
            pp.append('\n {0:4s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
-        pp.append('\n\n{0}\n'.format('='*79))
+    else:
+        # Monte Carlo - additional info
+        pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.3e}'.format('MC s.e.:', out['stderr'],'MC s.e. CoV:', out['stdcv']))
+ 
+    pp.append('\n\n{0}\n'.format('='*79))
     return ''.join(pp)
 
 

@@ -39,19 +39,19 @@ def relython(inp):
         T = tr.utrans(cmat_u)
         # Direct calculation methods
         print('Solving...')
-        if inp['solver'] == 'HLRF':
+        if inp['solver'].upper() == 'HLRF':
             result = solvers.hlrf(g, xdists, tr.u_to_x, T, inp)
-        elif inp['solver'] == 'SLSQP':
+        elif inp['solver'].upper() == 'SLSQP':
             result = solvers.slsqp(g, xdists, tr.u_to_x, T, inp)
         # Monte Carlo simulation methods
-        elif inp['solver'] == 'CMC':
+        elif inp['solver'].upper() == 'CMC':
             result = solvers.cmc(g, xdists, tr.u_to_x, T, inp)
-        elif inp['solver'] == 'IMC':
+        elif inp['solver'].upper() == 'ISMC':
             #result = solvers.ismc(g, xdists, tr.u_to_x, T, inp) 
             print ('Importance Sampling not yet implemented\n')
             return None
-        elif inp['solver'] == 'DSIM':
-            #result = solvers.ismc(g, xdists, tr.u_to_x, T, inp)
+        elif inp['solver'].upper() == 'DSIM':
+            #result = solvers.dsim(g, xdists, tr.u_to_x, T, inp)
             print('Directional Simulation not yet implemented\n')
             return None
         else:
@@ -86,12 +86,12 @@ if (len(argv) == 1) and (__name__ == '__main__'):
 elif  __name__ == '__main__':
     for input_file in argv[1:]:
         print('\nProcessing {0}...'.format(input_file))
-        try:
-            input_dict = io.loadfile(os.path.abspath(input_file))
-            relython(input_dict)
-        except Exception as e:
-            print('* Error processing {0}\n{1}'.format(os.path.join(path, input_file), e))
-            continue
+        #try:
+        input_dict = io.loadfile(os.path.abspath(input_file))
+        relython(input_dict)
+        #except Exception as e:
+        #    print('* Error processing {0}\n{1}'.format(os.path.join(path, input_file), e))
+        #    continue
 # Imported by other module or interpreter 
 else:
     pass

@@ -25,7 +25,7 @@ def corrmat_u(cmat_x, xdists):
             for ij in rho_dict.keys():
                 rho_ij = rho_dict[ij].get(timeout=60)['x']
                 cmat_u[ij], cmat_u[ij[::-1]] = rho_ij, rho_ij
-
+            pool.close()
     return cmat_u
 
 
