@@ -25,9 +25,5 @@ def cmc(g, xdists, u_to_x, T, inp):
     cv_pf = se_pf/mu_pf
     beta = -norm.ppf(mu_pf) if mu_pf < 0.5 else norm.ppf(mu_pf)
     msgs = []
-    # if d_beta > inp['tol']:
-    #     msgs.append('Warning: beta convergence = {0:.2e} > {1:.2e} after {2:d} iterations'.format(d_beta, inp['tol'], i))
-    # if isnan(beta):
-        # msgs.append('Warning: failed to converge - beta is nan')
     return {'vars': xdists, 'beta': beta, 'Pf': mu_pf, 'stderr': se_pf, 
             'stdcv': cv_pf, 'nitr': inp['maxitr'], 'g_beta': -1, 'msgs': msgs}

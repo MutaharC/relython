@@ -51,9 +51,7 @@ def relython(inp):
             print ('Importance Sampling not yet implemented\n')
             return None
         elif inp['solver'].upper() == 'DSIM':
-            #result = solvers.dsim(g, xdists, tr.u_to_x, T, inp)
-            print('Directional Simulation not yet implemented\n')
-            return None
+            result = solvers.dsim(g, xdists, tr.u_to_x, T, inp)
         else:
             print('Invalid/unsupported solver: {0}\n'.format(inp['solver']))
             return None

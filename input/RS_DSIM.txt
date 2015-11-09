@@ -1,0 +1,20 @@
+{
+"notes":       "R - S example 1:\n\tR~normal(20, 4)\n\tS~normal(10, 3)\n\tR and S independent", 
+"g":           "R - S",
+"vars": [
+               {"name": "R", "dist": "norm", "params": [20, 4], "desc": "Resistance"},
+               {"name": "S", "dist": "norm", "params": [10, 3], "desc": "Load"}
+         ],
+"correlation": [
+                ["x1", "x2", 0.0] 
+                ],
+"transform":   "Nataf",
+"solver":      "DSIM",
+"seed":        -1,
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
+"eps":         1.0e-8,
+"maxitr":      2000,
+"curvcheck":   0,
+"showresults": 1
+}

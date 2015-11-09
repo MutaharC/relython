@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
 from numpy import array, sqrt, eye, isnan, zeros, dot
 from scipy.stats import norm
+
 
 def dgdu(g, u, u_to_x, xdists, T, eps):
     """

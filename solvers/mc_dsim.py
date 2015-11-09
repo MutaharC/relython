@@ -1,46 +1,56 @@
 # -*- coding: utf-8 -*-
 from __future__ import division # Python 2.x compatibility
 from numpy import array, sqrt, eye, isnan, zeros, dot
-from numpy.random import normal
-from scipy.stats import norm
+import numpy.linalg as la
+from numpy.random import RandomState 
+from scipy.stats import norm, chi2
 
 
-def dir_sim(g, xdists, itr=1000, convg=1e-4):
+def dgdu(g, u, u_to_x, xdists, T, eps):
     """
-    Directional simulation algorithm to estimate reliability index. 
+    Gradient of g(u_to_x(u)) evaluated numerically using central differences.
     """
 
-    max_dist = 10.
-    n_steps = 20
-    ray_segs = linspace(0, max_dist, n_steps)
-    d_seg = ray_segs[1] - ray_segs[0]
-    n_dims = len(xdists)
-    bisect_max = 500
-    raw_rays = random.multivariate_normal(zeros(n_dims), cov=eye(n_dims), size=itr)
-    norms = linalg.norm(raw_rays, axis=-1)
-    rays = (raw_rays.T/norms).T
-    Pf = 0.
-    am = []
-    for ray in rays:
-        segments = array([g(*u_to_x(ray*l, xdists)) for l in ray_segs])
-        t = (diff(sign(segments)) != 0)
-        x0=0; x1=0        
-        if any(t):
-            x0 = ray*ray_segs[t][0]
-            x1 = x0 + d_seg*ray
-            for i in xrange(bisect_max):
-                m = (x0 + x1)/2
-                dx = x1 - x0
-                len_dx = sqrt((dx*dx).sum())
-                if len_dx/2 < convg:
-                    beta = (m*m).sum()
-                    Pf = Pf + 1 - chi2.cdf(beta, n_dims)
-                    am.append(m)
-                    break
-                else:
-                    if sign(g(*u_to_x(x0, xdists))) == sign(g(*u_to_x(m, xdists))):
-                        x0 = m
-                    else:
-                        x1 = m
-    print '%.3e' % (Pf/itr)
-    return array(am)
+    du_mat = eps*eye(u.size)
+    grad = array([0.5*(g(u_to_x(u+du_m, xdists, T))-
+                       g(u_to_x(u-du_m, xdists, T)))/eps 
+                  for du_m in du_mat])   
+    return grad
+
+
+def dsim(g, xdists, u_to_x, T, inp):
+    """
+    Directional simulation. 
+    """
+
+    # Seed the random number generator if required
+    if inp['seed'] == -1:
+        prng = RandomState()
+    else:
+        prng = RandomState(inp['seed'])
+
+    ndims = len(inp['vars'])
+    rays = prng.normal(0, 1, size=(inp['maxitr'], ndims))
+    unit_rays = rays/la.norm(rays)
+    pfs = zeros(inp['maxitr'])
+
+    for i, ray in enumerate(unit_rays):
+        d_ray = 1
+        ray0 = ray 
+        while abs(g(u_to_x(ray, xdists, T))) > inp['ftol'] and abs(d_ray) > inp['ftol']:
+            # Calculate gradient and directional derivative
+            grad = dgdu(g, ray, u_to_x, xdists, T, inp['eps'])
+            dderiv = dot(grad, ray/la.norm(ray))
+            # delta length of ray is g function / directional derivative
+            d_ray = g(u_to_x(ray, xdists, T))/dderiv
+            ray = ray - d_ray*ray/la.norm(ray)
+        # Only store a non-zero pf if the ray hasn't changed direction 
+        pfs[i] = 1 - chi2.cdf(la.norm(ray)**2, ndims) if dot(ray0, ray) > 0 else 0
+    pfs[isnan(pfs)] = 0
+    mu_pf, std_pf = pfs.mean(), pfs.std()
+    se_pf = std_pf/sqrt(inp['maxitr'])
+    cv_pf = se_pf/mu_pf
+    beta = -norm.ppf(mu_pf) if mu_pf < 0.5 else norm.ppf(mu_pf)
+    msgs = []
+    return {'vars': xdists, 'beta': beta, 'Pf': mu_pf, 'stderr': se_pf, 
+            'stdcv': cv_pf, 'nitr': inp['maxitr'], 'g_beta': -1, 'msgs': msgs}
