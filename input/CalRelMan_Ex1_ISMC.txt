@@ -9,12 +9,12 @@
                 ["x1", "x2", 0.0] 
                 ],
 "transform":   "Nataf",
-"solver":      "DSIM",
+"solver":      "ISMC",
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      20000,
+"maxitr":      16500,
 "curvcheck":   0,
 "showresults": 1
 }

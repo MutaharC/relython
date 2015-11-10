@@ -1,5 +1,5 @@
 {
-"notes":       "CalRel manual example 4:\n\tX1~lognormal(mu=500,sig=100);\n\tX2~lognormal(mu=2000,sig=400);\n\tX3~uniform(mu=5, sig=0.5)\n\tX4~lognormal(mu=450,sig=90);\n\tX5~lognormal(mu=1800, sig=360);\n\tX6~uniform(mu=4.5,sig=0.45)\n\tcorr(X1, X2)=0.3\n\tcorr(X1,X3)=0.2\n\tcorr(X2, X3)=0.2\n\tcorr(X4,X5)=0.3\n\tcorr(X4, X6)=0.2\n\tcorr(X5,X6)=0.2",
+"notes":       "CalRel manual example 4",
 "g":           "1.7 - x2/(1000.0*x3) - (x1/(200.0*x3))**2 - x5/(1000.0*x6) - (x4/(200*x6))**2",
 "vars": [
                {"name": "x1", "dist": "logn", "params": [6.1949977, 0.1980422], "desc": "X1"},
@@ -25,5 +25,5 @@
 "eps":         1.0e-8,
 "maxitr":      8000,
 "curvcheck":   0,
-"showresults": 0
+"showresults": 1
 }

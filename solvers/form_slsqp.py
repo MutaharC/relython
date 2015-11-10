@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from numpy import array, sqrt, eye, isnan, dot
+from numpy import sqrt, dot
 from scipy.stats import norm
 from scipy.optimize import minimize
 from ftrans import u_to_x
@@ -7,7 +7,7 @@ from ftrans import u_to_x
 def slsqp(g, xdists, u_to_x, T, inp):
     """
     Wrapper for scipy.optimize SLSQP constrained minimisation routine.
-    Minimizes beta subject to the constraint g(x) = 0. 
+    Minimizes beta subject to the constraint g(x)=0. 
     More stable than Rackwitz-Fiessler.
     """
 

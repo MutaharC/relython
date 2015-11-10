@@ -1,5 +1,5 @@
 {
-"notes":       "R - S example 1:\n\tR~normal(20, 4)\n\tS~normal(10, 3)\n\tR and S independent", 
+"notes":       "Basic R - S problem", 
 "g":           "R - S",
 "vars": [
                {"name": "R", "dist": "norm", "params": [20, 4], "desc": "Resistance"},

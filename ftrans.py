@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from numpy import dot, array, eye
+from numpy import dot, eye
 from numpy.linalg import cholesky
 from multiprocessing import Pool, cpu_count
 from nataf import nataf

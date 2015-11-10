@@ -15,7 +15,7 @@ import finout as io       # Input/output functions
 import solvers            # Solvers
 import ftrans as tr       # Transformations
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 
 def relython(inp):
@@ -37,7 +37,7 @@ def relython(inp):
         # Generate transformation matrix from standard to correlated U-space
         print('Generating transformation from standard to correlated U...')
         T = tr.utrans(cmat_u)
-        # Direct calculation methods
+        # Direct estimation methods
         print('Solving...')
         if inp['solver'].upper() == 'HLRF':
             result = solvers.hlrf(g, xdists, tr.u_to_x, T, inp)
@@ -47,9 +47,7 @@ def relython(inp):
         elif inp['solver'].upper() == 'CMC':
             result = solvers.cmc(g, xdists, tr.u_to_x, T, inp)
         elif inp['solver'].upper() == 'ISMC':
-            #result = solvers.ismc(g, xdists, tr.u_to_x, T, inp) 
-            print ('Importance Sampling not yet implemented\n')
-            return None
+            result = solvers.ismc(g, xdists, tr.u_to_x, T, inp) 
         elif inp['solver'].upper() == 'DSIM':
             result = solvers.dsim(g, xdists, tr.u_to_x, T, inp)
         else:

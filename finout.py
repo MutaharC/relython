@@ -120,18 +120,21 @@ def pprint(inp, cmat_x, cmat_u, out):
         pp.append('\n\n No correlation matrices shown - number of variables > 10')
     
     pp.append(subhead)
-    pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n {8:14s}{9:11d}\n'.format(
-          'Beta:', out['beta'], 'Pf:', out['Pf'], 'Transform:', inp['transform'], 'Solver:', inp['solver'], 'N_iter:', int(out['nitr'])))
+    pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
+          'Beta:', out['beta'], 'Pf:', out['Pf'], 'Transform:', inp['transform'],
+          'Solver:', inp['solver']))
     if inp['solver'] in ['HLRF', 'SLSQP']:
         # FORM - additional info
-        pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*)', out['g_beta']))
+        pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(out['nitr'])))
+        pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', out['g_beta']))
         pp.append('\n {0:4s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*48))
         for i, var in enumerate(inp['vars']):
            lineout = [var['name'], out['x_beta'][i], out['u_beta'][i], out['alpha'][i], out['alpha'][i]**2*100]
            pp.append('\n {0:4s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
     else:
         # Monte Carlo - additional info
-        pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.3e}'.format('MC s.e.:', out['stderr'],'MC s.e. CoV:', out['stdcv']))
+        pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr']))
+        pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.3e}\n {4:14s}{5:>11.0f}'.format('MC s.e.:', out['stderr'],'MC s.e. CoV:', out['stdcv'], 'Seed:', inp['seed']))
  
     pp.append('\n\n{0}\n'.format('='*79))
     return ''.join(pp)
