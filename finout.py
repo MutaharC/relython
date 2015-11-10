@@ -34,8 +34,8 @@ def validinp(inp):
         errmsgs.append("""\n*** Warning: variables in g-function not defined in vars""")
     if len(non_dists)>0:
         errmsgs.append("""\n*** Unsupported distribution(s) specified: {0}""".format(', '.join(unsupp_dists)))
-    if inp['solver'].upper() in ['CMC','ISMC','DSIM'] and 'seed' not in inp.keys():
-        errmsgs.append("""\n*** Specify seed in input file for CMC, ISMC and DSIM solvers""") 
+    #if inp['solver'].upper() in ['CMC','ISMC','DSIM'] and 'seed' not in inp.keys():
+    #    errmsgs.append("""\n*** Specify seed in input file for CMC, ISMC and DSIM solvers""") 
     return errmsgs
 
 
@@ -83,7 +83,7 @@ def corrmat_x(inp):
     return cmat_x
 
 
-def pprint(inp, cmat_x, cmat_u, out):
+def pprint(inp, cmat_x, cmat_u, outputs):
     """
     Pretty print input and results of reliability calculation.
     """
@@ -91,50 +91,52 @@ def pprint(inp, cmat_x, cmat_u, out):
     vars_m = [var['name'] for var in inp['vars']]
     nvars = len(vars_m)
     
-    formheader = '\n{0}\n={2}=\n= FORM analysis{3}=\n={2}=\n{1}'.format('='*79, '='*79, ' '*77, ' '*63)
-    mcheader = '\n{0}\n={2}=\n= Monte Carlo reliability analysis{3}=\n={2}=\n{1}'.format('='*79, '='*79, ' '*77, ' '*44)
-    if inp['solver'] in ['HLRF', 'SLSQP']:
-        pp = [formheader]
-        subhead = '\n\n FORM results\n {0}'.format('-'*12)
-    else:
-        pp = [mcheader]
-        subhead = '\n\n Monte Carlo results\n {0}'.format('-'*19)
+    header = '\n{0}\n={2}=\n= Relython analysis{3}=\n={2}=\n{1}'.format('='*79, '='*79, ' '*77, ' '*59)
+    pp = [header]
+
     pp.append('\n\n Calculation Notes\n {0}\n {1}'.format('-'*17, inp['notes']))
     pp.append('\n\n Limit state function\n {0}\n '.format('-'*20))
     pp.append(llfmt('g({0}) = {1}'.format(','.join(vars_m), inp['g'])))
-    pp.append('\n\n {0:4s}{1:<14s}{2:>4s}{3:>10s}{4:>10s}{5:>10s}{6:>10s}{7:>10s}\n {8}'.format('Var','Description','Dist','Param1','Param2','Param3','Mean','StdDev','-'*72))
+    pp.append('\n\n {0:6s}{1:<27s}{2:>4s}{3:>10s}{4:>10s}{5:>10s}{6:>10s}\n {7}'.format('Var','Description','Dist','Param1','Param2','Mean','StdDev','-'*77))
     for i, var in enumerate(inp['vars']): 
-        vparams = [var['params'][j] if j<len(var['params']) else None for j in range(3)]
-        pp.append('\n {0:4s}{1:<14s}{2:>4s}{3}'.format(var['name'], var['desc'], var['dist'], ''.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams)))
-        pp.append('{0:10.2e}{1:10.2e}'.format(out['vars'][i].mu, out['vars'][i].sig))
+        vparams = [var['params'][j] if j<len(var['params']) else None for j in range(2)]
+        pp.append('\n {0:6s}{1:<27s}{2:>4s}{3}'.format(var['name'], var['desc'], var['dist'], ''.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams)))
+        pp.append('{0:10.2e}{1:10.2e}'.format(inp['xdists'][i].mu, inp['xdists'][i].sig))
     
     if nvars <= 10: 
-        pp.append('\n\n Correlation matrix in X-space\n {0}\n    {1}'.format(29*'-', ''.join('{0:>7s}'.format(var['name']) for var in inp['vars'])))
+        pp.append('\n\n Correlation matrix in X-space\n {0}\n      {1}'.format(29*'-', ''.join('{0:>8s}'.format(var['name']) for var in inp['vars'])))
         for i, row in enumerate(cmat_x):
-            pp.append('\n {0:4s}'.format(inp['vars'][i]['name']) + ''.join('{0:>7.4f}'.format(elt) for elt in row))
+            pp.append('\n {0:6s}'.format(inp['vars'][i]['name']) + ''.join('{0:>-8.4f}'.format(elt) for elt in row))
     
-        pp.append('\n\n Correlation matrix in U-space\n {0}\n     {1}'.format(29*'-', ''.join('{0:>7s}'.format(var['name']+'\'') for var in inp['vars'])))
+        pp.append('\n\n Correlation matrix in U-space\n {0}\n       {1}'.format(29*'-', ''.join('{0:>8s}'.format(var['name']+'\'') for var in inp['vars'])))
         for i, row in enumerate(cmat_u):
-            pp.append('\n {0:4s}'.format(inp['vars'][i]['name']+'\'') + ''.join('{0:>7.4f}'.format(elt) for elt in row))
+            pp.append('\n {0:6s}'.format(inp['vars'][i]['name']+'\'') + ''.join('{0:>-8.4f}'.format(elt) for elt in row))
     else:
         pp.append('\n\n No correlation matrices shown - number of variables > 10')
-    
-    pp.append(subhead)
-    pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
-          'Beta:', out['beta'], 'Pf:', out['Pf'], 'Transform:', inp['transform'],
-          'Solver:', inp['solver']))
-    if inp['solver'] in ['HLRF', 'SLSQP']:
-        # FORM - additional info
-        pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(out['nitr'])))
-        pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', out['g_beta']))
-        pp.append('\n {0:4s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*48))
-        for i, var in enumerate(inp['vars']):
-           lineout = [var['name'], out['x_beta'][i], out['u_beta'][i], out['alpha'][i], out['alpha'][i]**2*100]
-           pp.append('\n {0:4s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
-    else:
-        # Monte Carlo - additional info
-        pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr']))
-        pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.3e}\n {4:14s}{5:>11.0f}'.format('MC s.e.:', out['stderr'],'MC s.e. CoV:', out['stdcv'], 'Seed:', inp['seed']))
+
+    # Solver output 
+    for i, output in enumerate(outputs):
+        if inp['solver'][i] in ['HLRF', 'SLSQP']:
+            subhead = '\n\n FORM results\n {0}'.format('-'*12)
+        else:
+            subhead = '\n\n Monte Carlo results\n {0}'.format('-'*19)
+        pp.append(subhead)
+        pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
+                  'Beta:', output['beta'], 'Pf:', output['Pf'], 'Transform:', inp['transform'],
+                  'Solver:', inp['solver'][i]))
+        if inp['solver'][i] in ['HLRF', 'SLSQP']:
+            # FORM - additional info
+            pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(output['nitr'])))
+            pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', output['g_beta']))
+            pp.append(' {0:14s}{1:11.4e}\n'.format('Tolerance:', output['tol']))
+            pp.append('\n {0:6s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*50))
+            for i, var in enumerate(inp['vars']):
+               lineout = [var['name'], output['x_beta'][i], output['u_beta'][i], output['alpha'][i], output['alpha'][i]**2*100]
+               pp.append('\n {0:6s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
+        else:
+            # Monte Carlo - additional info
+            pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr'][i]))
+            pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.3e}\n {4:14s}{5:>11.0f}'.format('MC s.e.:', output['stderr'],'MC s.e. CoV:', output['stdcv'], 'Seed:', inp['seed']))
  
     pp.append('\n\n{0}\n'.format('='*79))
     return ''.join(pp)

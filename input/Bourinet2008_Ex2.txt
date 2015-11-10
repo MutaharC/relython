@@ -1,5 +1,5 @@
 {
-"notes":       "Bourinet (2008) example 2: R lognormal with mu=5, sig=5; S Frechet with mu=1, sig=1",
+"notes":       "Bourinet (2008) example 2",
 "g":           "R - S",
 "vars": [
                {"name": "R", "dist": "logn", "params": [1.262864, 0.832554], "desc": "Resistance"},
@@ -9,11 +9,12 @@
                 ["R", "S", 0.5]
                 ],
 "transform":   "Nataf",
-"solver":      "HLRF",
+"solver":      ["HLRF", "SLSQP", "CMC", "ISMC", "DSIM"],
+"seed":        1,
 "tol":         1.0e-6,
 "ftol":        1.0e-6,
 "eps":         1.0e-8,
-"maxitr":      100,
+"maxitr":      [20, 20, 20000, 2000, 2000],
 "curvcheck":   0,
 "showresults": 1
 }

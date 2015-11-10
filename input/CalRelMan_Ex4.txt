@@ -18,12 +18,12 @@
                 ["x5", "x6", 0.2]
                 ],
 "transform":   "Nataf",
-"solver":      "CMC",
+"solver":      ["CMC", "ISMC", "SLSQP", "HLRF"],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      150000,
+"maxitr":      [150000, 15000, 150, 150],
 "curvcheck":   0,
 "showresults": 1
 }

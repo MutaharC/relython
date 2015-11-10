@@ -8,23 +8,23 @@ from scipy.stats import norm, multivariate_normal
 from solvers import slsqp
 
 
-def ismc(g, xdists, u_to_x, T, inp):
+def ismc(g, xdists, u_to_x, T, seed, maxitr, tol, ftol, eps):
     """
     Importance sampling Monte Carlo.
     """
 
     # Seed the random number generator if required
-    if inp['seed'] == -1:
+    if seed == -1:
         prng = RandomState()
     else:
-        prng = RandomState(inp['seed'])
+        prng = RandomState(seed)
     
     # Use FORM to get estimate of u*
-    u_beta = slsqp(g, xdists, u_to_x, T, inp)['u_beta']
+    u_beta = slsqp(g, xdists, u_to_x, T, maxitr, tol, ftol, eps)['u_beta']
 
     # Generate standard normal samples centred at u*
     covmat = eye(len(xdists))
-    v = prng.multivariate_normal(u_beta, covmat, size=inp['maxitr']).T
+    v = prng.multivariate_normal(u_beta, covmat, size=maxitr).T
     g_mc = g(u_to_x(v, xdists, T))
     
     # Define importance sampling functions weighting functions
@@ -40,7 +40,7 @@ def ismc(g, xdists, u_to_x, T, inp):
 
     # Convergence metrics (standard deviation, standard error, CoV of s.e.)
     std_pf = indfunc.std(ddof=1) # Calculate sample standard deviation
-    se_pf = std_pf/sqrt(inp['maxitr'])
+    se_pf = std_pf/sqrt(maxitr)
     cv_pf = se_pf/mu_pf
 
     return {'vars': xdists, 'beta': beta, 'Pf': mu_pf, 'stderr': se_pf, 

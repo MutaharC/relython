@@ -12,12 +12,12 @@
                 ["x2", "x3", 0.2]
                 ],
 "transform":   "Nataf",
-"solver":      "ISMC",
+"solver":      ["CMC", "ISMC", "DSIM", "SLSQP", "HLRF"],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      1000,
+"maxitr":      [10000, 1000, 1000, 100, 100],
 "curvcheck":   0,
 "showresults": 1
 }
