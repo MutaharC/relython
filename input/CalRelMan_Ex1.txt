@@ -10,11 +10,11 @@
                 ],
 "transform":   "Nataf",
 "solver":      ["CMC", "ISMC", "DSIM", "SLSQP", "HLRF"],
+"maxitr":      [50000, 5000, 5000, 100, 100],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      [50000, 5000, 5000, 100, 100],
 "curvcheck":   0,
 "showresults": 1
 }

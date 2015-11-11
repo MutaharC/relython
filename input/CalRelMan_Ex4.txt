@@ -1,6 +1,5 @@
 {
 "notes":       "CalRel manual example 4",
-"g":           "1.7 - x2/(1000.0*x3) - (x1/(200.0*x3))**2 - x5/(1000.0*x6) - (x4/(200*x6))**2",
 "vars": [
                {"name": "x1", "dist": "logn", "params": [6.1949977, 0.1980422], "desc": "X1"},
                {"name": "x2", "dist": "logn", "params": [7.5812921, 0.1980422], "desc": "X2"},
@@ -17,13 +16,14 @@
                 ["x4", "x6", 0.2],
                 ["x5", "x6", 0.2]
                 ],
+"g":           ["1.7 - x2/(1000.0*x3) - (x1/(200.0*x3))**2 - x5/(1000.0*x6) - (x4/(200*x6))**2"],
 "transform":   "Nataf",
 "solver":      ["CMC", "ISMC", "SLSQP", "HLRF"],
+"maxitr":      [150000, 15000, 150, 150],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      [150000, 15000, 150, 150],
 "curvcheck":   0,
 "showresults": 1
 }

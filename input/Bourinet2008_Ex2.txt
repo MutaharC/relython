@@ -1,6 +1,5 @@
 {
 "notes":       "Bourinet (2008) example 2",
-"g":           "R - S",
 "vars": [
                {"name": "R", "dist": "logn", "params": [1.262864, 0.832554], "desc": "Resistance"},
                {"name": "S", "dist": "frch", "params": [2.529935, 0.676404, 0], "desc": "Load"}
@@ -8,13 +7,14 @@
 "correlation": [
                 ["R", "S", 0.5]
                 ],
+"g":           "R - S",
 "transform":   "Nataf",
 "solver":      ["HLRF", "SLSQP", "CMC", "ISMC", "DSIM"],
+"maxitr":      [20, 20, 20000, 2000, 2000],
 "seed":        1,
 "tol":         1.0e-6,
 "ftol":        1.0e-6,
 "eps":         1.0e-8,
-"maxitr":      [20, 20, 20000, 2000, 2000],
 "curvcheck":   0,
 "showresults": 1
 }

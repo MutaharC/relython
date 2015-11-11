@@ -1,0 +1,38 @@
+{
+"notes":       "Straub (2010)/Der Kiureghian (2005) portal frame example",
+"vars": [
+               {"name": "m1", "dist": "logn", "params": [4.9910249, 0.1980422], "desc": "Mp at 1"},
+               {"name": "m2", "dist": "logn", "params": [4.9910249, 0.1980422], "desc": "Mp at 2"},
+               {"name": "m3", "dist": "logn", "params": [4.9910249, 0.1980422], "desc": "Mp at 3"},
+               {"name": "m4", "dist": "logn", "params": [4.9910249, 0.1980422], "desc": "Mp at 4"},
+               {"name": "m5", "dist": "logn", "params": [4.9910249, 0.1980422], "desc": "Mp at 5"},
+               {"name": "h", "dist": "gumb", "params": [40.9989358, 15.5939360], "desc": "Horizontal load"},
+               {"name": "v", "dist": "gamm", "params": [25.0, 2.4], "desc": "Vertical load"}
+         ],
+"correlation": [
+                ["m1", "m2", 0.3], 
+                ["m1", "m3", 0.3],
+                ["m1", "m4", 0.3],
+                ["m1", "m5", 0.3], 
+                ["m2", "m3", 0.3],
+                ["m2", "m4", 0.3], 
+                ["m2", "m5", 0.3],
+                ["m3", "m4", 0.3],
+                ["m3", "m5", 0.3], 
+                ["m4", "m5", 0.3]
+                ],
+"g":           [
+                "m1 + m2 + m4 + m5 - 5*h",
+                "m2 + 2*m3 + m4 - 5*v",
+                "m1 + 2*m3 + 2*m4 +m5 - 5*h - 5*v"
+               ],
+"transform":   "Nataf",
+"solver":      ["CMC", "ISMC", "SLSQP"],
+"maxitr":      [1500000, 150000, 150],
+"seed":        -1,
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
+"eps":         1.0e-8,
+"curvcheck":   0,
+"showresults": 1
+}

@@ -1,6 +1,5 @@
 {
 "notes":       "Basic R - S problem", 
-"g":           "R - S",
 "vars": [
                {"name": "R", "dist": "norm", "params": [20, 4], "desc": "Resistance"},
                {"name": "S", "dist": "norm", "params": [10, 3], "desc": "Load"}
@@ -8,13 +7,14 @@
 "correlation": [
                 ["x1", "x2", 0.0] 
                 ],
+"g":           ["R - S"],
 "transform":   "Nataf",
 "solver":      ["CMC", "ISMC", "DSIM", "SLSQP", "HLRF"],
+"maxitr":      [20000, 2000, 2000, 20, 20],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"maxitr":      [20000, 2000, 2000, 20, 20],
 "curvcheck":   0,
 "showresults": 1
 }

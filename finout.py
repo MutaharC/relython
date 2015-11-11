@@ -25,15 +25,19 @@ def validinp(inp):
     modpath = os.path.dirname(os.path.realpath(__file__))
     errmsgs = []
 
-    # g-function variables
-    vars_g = re.findall(r'\b[a-zA-Z]+[a-zA-Z0-9]*\b', inp['g']) 
-    vars_m = [var['name'] for var in inp['vars']]
     non_dists = [var['dist'] for var in inp['vars'] if var['dist']+'.py' not in
-                    os.listdir(os.path.join(modpath, 'dists'))]
-    if not set(vars_g).issubset(set(vars_m)):
-        errmsgs.append("""\n*** Warning: variables in g-function not defined in vars""")
+                 os.listdir(os.path.join(modpath, 'dists'))]
     if len(non_dists)>0:
-        errmsgs.append("""\n*** Unsupported distribution(s) specified: {0}""".format(', '.join(unsupp_dists)))
+        errmsgs.append('\n*** Unsupported distribution(s): {0}'.format(
+                       ', '.join(unsupp_dists)))
+
+    # g-function variables
+    vars_g = [re.findall(r'\b[a-zA-Z]+[a-zA-Z0-9]*\b', gstr) for gstr in inp['g']] 
+    vars_m = [var['name'] for var in inp['vars']]
+    gvm = '\n*** Warning: undefined variables in g-function '
+    gvarsmsg = [gvm + str(i+1) for i, vg in enumerate(vars_g) 
+                if not set(vg).issubset(set(vars_m))]
+
     #if inp['solver'].upper() in ['CMC','ISMC','DSIM'] and 'seed' not in inp.keys():
     #    errmsgs.append("""\n*** Specify seed in input file for CMC, ISMC and DSIM solvers""") 
     return errmsgs
@@ -44,8 +48,8 @@ def parseinp(inp):
     Parse input dict into useful objects for computation.
     """
     
-    # Parse g-function
-    g = str_to_g(inp)
+    # Parse g-function(s)
+    gfuncs = [str_to_g(gstring, inp) for gstring in inp['g']]
     
     # Generate list of distribution objects
     xdists = [dists.__dict__[var['dist']](*var['params']) for var in inp['vars']]
@@ -53,17 +57,17 @@ def parseinp(inp):
     # Generate correlation matrix in X-space
     cmat_x = corrmat_x(inp)
 
-    return g, xdists, cmat_x
+    return gfuncs, xdists, cmat_x
 
 
-def str_to_g(inp):
+def str_to_g(gstring, inp):
     """
     Convert string literal g-function into full function.
     """
     
     ldict = locals()    # Python 3 fix
     args = ','.join([var['name'] for var in inp['vars']])
-    fstr = 'def g(x):{0} = x; return {1}'.format(args, inp['g'])
+    fstr = 'def g(x):{0} = x; return {1}'.format(args, gstring)
     exec (fstr, locals())
     return ldict['g']   # Python 3 fix
 
@@ -95,8 +99,7 @@ def pprint(inp, cmat_x, cmat_u, outputs):
     pp = [header]
 
     pp.append('\n\n Calculation Notes\n {0}\n {1}'.format('-'*17, inp['notes']))
-    pp.append('\n\n Limit state function\n {0}\n '.format('-'*20))
-    pp.append(llfmt('g({0}) = {1}'.format(','.join(vars_m), inp['g'])))
+
     pp.append('\n\n {0:6s}{1:<27s}{2:>4s}{3:>10s}{4:>10s}{5:>10s}{6:>10s}\n {7}'.format('Var','Description','Dist','Param1','Param2','Mean','StdDev','-'*77))
     for i, var in enumerate(inp['vars']): 
         vparams = [var['params'][j] if j<len(var['params']) else None for j in range(2)]
@@ -115,28 +118,34 @@ def pprint(inp, cmat_x, cmat_u, outputs):
         pp.append('\n\n No correlation matrices shown - number of variables > 10')
 
     # Solver output 
+    pp.append('\n\n\n Limit state functions\n {0}'.format('-'*21))
     for i, output in enumerate(outputs):
-        if inp['solver'][i] in ['HLRF', 'SLSQP']:
+        slvix = i % len(inp['solver'])
+        gix = i // len(inp['solver'])
+        
+        pp.append(llfmt('\n\n g({0}) = {1}'.format(','.join(vars_m), inp['g'][gix])))
+
+        if inp['solver'][slvix] in ['HLRF', 'SLSQP']:
             subhead = '\n\n FORM results\n {0}'.format('-'*12)
         else:
             subhead = '\n\n Monte Carlo results\n {0}'.format('-'*19)
         pp.append(subhead)
         pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
                   'Beta:', output['beta'], 'Pf:', output['Pf'], 'Transform:', inp['transform'],
-                  'Solver:', inp['solver'][i]))
-        if inp['solver'][i] in ['HLRF', 'SLSQP']:
+                  'Solver:', inp['solver'][slvix]))
+        if inp['solver'][slvix] in ['HLRF', 'SLSQP']:
             # FORM - additional info
             pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(output['nitr'])))
             pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', output['g_beta']))
             pp.append(' {0:14s}{1:11.4e}\n'.format('Tolerance:', output['tol']))
             pp.append('\n {0:6s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*50))
-            for i, var in enumerate(inp['vars']):
-               lineout = [var['name'], output['x_beta'][i], output['u_beta'][i], output['alpha'][i], output['alpha'][i]**2*100]
+            for j, var in enumerate(inp['vars']):
+               lineout = [var['name'], output['x_beta'][j], output['u_beta'][j], output['alpha'][j], output['alpha'][j]**2*100]
                pp.append('\n {0:6s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
         else:
             # Monte Carlo - additional info
-            pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr'][i]))
-            pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.3e}\n {4:14s}{5:>11.0f}'.format('MC s.e.:', output['stderr'],'MC s.e. CoV:', output['stdcv'], 'Seed:', inp['seed']))
+            pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr'][slvix]))
+            pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.0f}'.format('MC s.e. CoV:', output['stdcv'], 'Seed:', inp['seed']))
  
     pp.append('\n\n{0}\n'.format('='*79))
     return ''.join(pp)

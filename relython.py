@@ -31,7 +31,7 @@ def relython(inp):
         results = []
         # Parse and prepare input
         print('Parsing input...')
-        g, xdists, cmat_x = io.parseinp(inp) 
+        gfuncs, xdists, cmat_x = io.parseinp(inp) 
         inp['xdists'] = xdists # So can show mus and sigs in pprint
         # Convert correlation matrix from X- to U-space
         print('Converting correlation matrix to U-space...')
@@ -39,34 +39,35 @@ def relython(inp):
         # Generate transformation matrix from standard to correlated U-space
         print('Generating transformation from standard to correlated U...')
         T = tr.utrans(cmat_u)
-        for i, slvr in enumerate(inp['solver']):
-            print('Solving: {0}...'.format(slvr))
-            # Direct estimation methods
-            if slvr.upper() == 'HLRF':
-                results.append(sl.hlrf(g, xdists, tr.u_to_x, T, inp['maxitr'][i],
-                                       inp['tol'], inp['ftol'], inp['eps']))
-            elif slvr.upper() == 'SLSQP':
-                results.append(sl.slsqp(g, xdists, tr.u_to_x, T,inp['maxitr'][i],
+
+        for g in gfuncs:
+            for i, slvr in enumerate(inp['solver']):
+                print('Solving: {0}...'.format(slvr))
+                # Direct estimation methods
+                if slvr.upper() == 'HLRF':
+                    results.append(sl.hlrf(g, xdists, tr.u_to_x, T, inp['maxitr'][i],
+                                           inp['tol'], inp['ftol'], inp['eps']))
+                elif slvr.upper() == 'SLSQP':
+                    results.append(sl.slsqp(g, xdists, tr.u_to_x, T,inp['maxitr'][i],
                                         inp['tol'], inp['ftol'], inp['eps'])) 
-            # Monte Carlo simulation methods
-            elif slvr.upper() == 'CMC':
-                results.append(sl.cmc(g, xdists, tr.u_to_x, T, inp['seed'], 
-                                      inp['maxitr'][i]))
-            elif slvr.upper() == 'ISMC':
-                results.append(sl.ismc(g, xdists, tr.u_to_x, T, inp['seed'], 
-                                       inp['maxitr'][i], inp['tol'], inp['ftol'],
-                                       inp['eps'])) 
-            elif slvr.upper() == 'DSIM':
-                results.append(sl.dsim(g, xdists, tr.u_to_x, T, inp['seed'], 
-                                       inp['maxitr'][i], inp['tol'], inp['ftol'],
-                                       inp['eps'])) 
-            else:
-                continue
+                # Monte Carlo simulation methods
+                elif slvr.upper() == 'CMC':
+                    results.append(sl.cmc(g, xdists, tr.u_to_x, T, inp['seed'], 
+                                          inp['maxitr'][i]))
+                elif slvr.upper() == 'ISMC':
+                    results.append(sl.ismc(g, xdists, tr.u_to_x, T, inp['seed'], 
+                                           inp['maxitr'][i], inp['tol'], inp['ftol'],
+                                           inp['eps'])) 
+                elif slvr.upper() == 'DSIM':
+                    results.append(sl.dsim(g, xdists, tr.u_to_x, T, inp['seed'], 
+                                           inp['maxitr'][i], inp['tol'], inp['ftol'],
+                                           inp['eps'])) 
+                else:
+                    continue
 
         if inp['showresults'] == 1:
             print(io.pprint(inp, cmat_x, cmat_u, results))
 
-        print('Complete.\n')
         return results
     else:
         if inp['showresults'] == 1:
