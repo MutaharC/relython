@@ -7,7 +7,7 @@
 "correlation": [
                 ["R", "S", 0.5]
                 ],
-"g":           "R - S",
+"g":           ["R - S"],
 "transform":   "Nataf",
 "solver":      ["HLRF", "SLSQP", "CMC", "ISMC", "DSIM"],
 "maxitr":      [20, 20, 20000, 2000, 2000],

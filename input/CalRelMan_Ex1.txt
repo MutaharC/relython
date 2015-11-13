@@ -1,6 +1,5 @@
 {
 "notes":       "CalRel manual example 1", 
-"g":           "x1 - x2",
 "vars": [
                {"name": "x1", "dist": "unif", "params": [0, 100], "desc": "X1"},
                {"name": "x2", "dist": "expo", "params": [0.05], "desc": "X2"}
@@ -8,13 +7,14 @@
 "correlation": [
                 ["x1", "x2", 0.0] 
                 ],
+"g":           ["x1 - x2"],
 "transform":   "Nataf",
-"solver":      ["CMC", "ISMC", "DSIM", "SLSQP", "HLRF"],
-"maxitr":      [50000, 5000, 5000, 100, 100],
+"solver":      ["CMC", "ISMC", "SLSQP"],
+"maxitr":      [50000, 5000, 100],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
 "curvcheck":   0,
-"showresults": 1
+"outpath":     "C:/Users/mchalmers/Documents/@Python/reliability/CalRel_Ex1_relython.txt"
 }

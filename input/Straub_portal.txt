@@ -27,12 +27,13 @@
                 "m1 + 2*m3 + 2*m4 +m5 - 5*h - 5*v"
                ],
 "transform":   "Nataf",
-"solver":      ["CMC", "ISMC", "SLSQP"],
-"maxitr":      [1500000, 150000, 150],
+"solver":      ["CMC", "ISMC", "SLSQP", "HLRF"],
+"maxitr":      [1500000, 150000, 150, 150],
 "seed":        -1,
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"curvcheck":   0,
+"outpath":
+"C:/Users/mchalmers/Documents/@Python/reliability/StraubPortal_relython.txt",
 "showresults": 1
 }

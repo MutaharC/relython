@@ -24,6 +24,7 @@
 "tol":         1.0e-8,
 "ftol":        1.0e-8,
 "eps":         1.0e-8,
-"curvcheck":   0,
+"outpath":
+"C:/Users/mchalmers/Documents/@Python/reliability/CalRel_Ex4_relython.txt",
 "showresults": 1
 }

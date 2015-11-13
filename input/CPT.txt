@@ -1,0 +1,30 @@
+{
+"notes":       "Bayesian network CPT example", 
+"vars":        [
+                {"name": "R", "dist": "norm", "params": [40, 4], "desc": "Resistance"},
+                {"name": "S1", "dist": "norm", "params": [10, 2], "desc": "Load"},
+                {"name": "S2", "dist": "norm", "params": [15, 3], "desc": "Load"},
+                {"name": "S3", "dist": "norm", "params": [20, 4], "desc": "Load"},
+                {"name": "S4", "dist": "norm", "params": [25, 5], "desc": "Load"},
+                {"name": "S5", "dist": "norm", "params": [30, 6], "desc": "Load"}
+               ],
+"correlation": [
+                ["x1", "x2", 0.0] 
+                ],
+"g":           [
+                "R - S1",
+                "R - S2",
+                "R - S3",
+                "R - S4",
+                "R - S5"
+             ],
+"transform":   "Nataf",
+"solver":      ["SLSQP"],
+"maxitr":      [30],
+"seed":        -1,
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
+"eps":         1.0e-8,
+"curvcheck":   0,
+"showresults": 1
+}

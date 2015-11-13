@@ -87,7 +87,7 @@ def corrmat_x(inp):
     return cmat_x
 
 
-def pprint(inp, cmat_x, cmat_u, outputs):
+def pprint(inp, cmat_x, cmat_u, res, version, author):
     """
     Pretty print input and results of reliability calculation.
     """
@@ -95,63 +95,91 @@ def pprint(inp, cmat_x, cmat_u, outputs):
     vars_m = [var['name'] for var in inp['vars']]
     nvars = len(vars_m)
     
-    header = '\n{0}\n={2}=\n= Relython analysis{3}=\n={2}=\n{1}'.format('='*79, '='*79, ' '*77, ' '*59)
+    header = '\n{0}\n= Relython v{1:4s}{2}=\n{0}'.format('='*79, version, ' '*62)
     pp = [header]
-
-    pp.append('\n\n Calculation Notes\n {0}\n {1}'.format('-'*17, inp['notes']))
-
-    pp.append('\n\n {0:6s}{1:<27s}{2:>4s}{3:>10s}{4:>10s}{5:>10s}{6:>10s}\n {7}'.format('Var','Description','Dist','Param1','Param2','Mean','StdDev','-'*77))
+   
+    # Summary table of Pf and betas (less detailed)
+    fst3slvrs = inp['solver'][:3]
+    summ_ = '\n Summary of results\n {0}\n'.format('-'*18)
+    summ0 = '|     |' + '|'.join('{0:^22s}'.format(slv) for slv in fst3slvrs)+'|'
+    summ1 = '| g_id|' + '|'.join('{0:^11s} {1:^10s}'.format('Pf', 'Beta') for slv in fst3slvrs)+'|'
+    summ2 = '+-----+'+'+'.join('{0:22s}'.format('-'*22) for slv in fst3slvrs)+'+'
+    summ = ['\n ' + '\n '.join((summ_, summ2, summ0, summ1, summ2)) + '\n ']
+    for i in range(len(inp['g'])):
+        summ3 = '|{0:^5d}|'.format(i)
+        fst3slv = res[i][:3]
+        summ4 = '|'.join('{0:11.4e} {1:10.6f}'.format(slv_i['Pf'], slv_i['beta']) for slv_i in fst3slv)
+        summ.append(summ3 + summ4+'|\n ')
+    summ.append(summ2)
+    
+    # Limit state functions
+    gfunc_ = '\n\n Limit state functions\n {0}'.format('-'*22)
+    gfunc = ['\n\n  g_id   Expression'+'\n '+'-'*18]
+    for i in range(len(inp['g'])):
+        gfunc.append('\n {0:^8d}'.format(i))
+        gfunc.append(llfmt('g({0}) = {1}'.format(', '.join(vars_m), inp['g'][i])))
+    
+    # Print details of variables
+    vs_ = '\n\n Variables\n {0}'.format('-'*9)
+    vs = []
+    vfmt = '\n\n {0:6s}{1:<24s}{2:>4s}{3:>10s}{4:>10s}{5:>10s}{6:>10s}\n {7}' 
+    vs.append(vfmt.format('Var','Description','Dist','Param1','Param2','Mean','StdDev','-'*74))
     for i, var in enumerate(inp['vars']): 
         vparams = [var['params'][j] if j<len(var['params']) else None for j in range(2)]
-        pp.append('\n {0:6s}{1:<27s}{2:>4s}{3}'.format(var['name'], var['desc'], var['dist'], ''.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams)))
-        pp.append('{0:10.2e}{1:10.2e}'.format(inp['xdists'][i].mu, inp['xdists'][i].sig))
-    
+        vs.append('\n {0:6s}{1:<24s}{2:>4s}'.format(var['name'], var['desc'], var['dist']))
+        vs.append(''.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams))
+        vs.append('{0:10.2e}{1:10.2e}'.format(inp['xdists'][i].mu, inp['xdists'][i].sig))
+
+    # Print correlation matrices 
     if nvars <= 10: 
-        pp.append('\n\n Correlation matrix in X-space\n {0}\n      {1}'.format(29*'-', ''.join('{0:>8s}'.format(var['name']) for var in inp['vars'])))
+        cm = ['\n\n Correlation matrix in X-space\n {0}\n      '.format(29*'-')]
+        cm.append(' '.join('{0:>7s}'.format(var['name']) for var in inp['vars']))
         for i, row in enumerate(cmat_x):
-            pp.append('\n {0:6s}'.format(inp['vars'][i]['name']) + ''.join('{0:>-8.4f}'.format(elt) for elt in row))
+            cm.append('\n {0:6s}'.format(inp['vars'][i]['name']))
+            cm.append(' '.join('{0:>-7.4f}'.format(elt) for elt in row))
     
-        pp.append('\n\n Correlation matrix in U-space\n {0}\n       {1}'.format(29*'-', ''.join('{0:>8s}'.format(var['name']+'\'') for var in inp['vars'])))
+        cm.append('\n\n Correlation matrix in U-space\n {0}\n      '.format(29*'-'))
+        cm.append(''.join('{0:>7s}\''.format(var['name']) for var in inp['vars']))
         for i, row in enumerate(cmat_u):
-            pp.append('\n {0:6s}'.format(inp['vars'][i]['name']+'\'') + ''.join('{0:>-8.4f}'.format(elt) for elt in row))
+            cm.append('\n {0:6s}'.format(inp['vars'][i]['name']+'\''))
+            cm.append(' '.join('{0:>-7.4f}'.format(elt) for elt in row))
     else:
-        pp.append('\n\n No correlation matrices shown - number of variables > 10')
+        cm.append('\n\n No correlation matrices shown - number of variables > 10')
 
-    # Solver output 
-    pp.append('\n\n\n Limit state functions\n {0}'.format('-'*21))
-    for i, output in enumerate(outputs):
-        slvix = i % len(inp['solver'])
-        gix = i // len(inp['solver'])
-        
-        pp.append(llfmt('\n\n g({0}) = {1}'.format(','.join(vars_m), inp['g'][gix])))
+    pp.extend([''.join(elem) for elem in [summ, gfunc, vs, cm]])
 
-        if inp['solver'][slvix] in ['HLRF', 'SLSQP']:
-            subhead = '\n\n FORM results\n {0}'.format('-'*12)
-        else:
-            subhead = '\n\n Monte Carlo results\n {0}'.format('-'*19)
-        pp.append(subhead)
-        pp.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
-                  'Beta:', output['beta'], 'Pf:', output['Pf'], 'Transform:', inp['transform'],
-                  'Solver:', inp['solver'][slvix]))
-        if inp['solver'][slvix] in ['HLRF', 'SLSQP']:
-            # FORM - additional info
-            pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(output['nitr'])))
-            pp.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', output['g_beta']))
-            pp.append(' {0:14s}{1:11.4e}\n'.format('Tolerance:', output['tol']))
-            pp.append('\n {0:6s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*50))
-            for j, var in enumerate(inp['vars']):
-               lineout = [var['name'], output['x_beta'][j], output['u_beta'][j], output['alpha'][j], output['alpha'][j]**2*100]
-               pp.append('\n {0:6s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
-        else:
-            # Monte Carlo - additional info
-            pp.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr'][slvix]))
-            pp.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.0f}'.format('MC s.e. CoV:', output['stdcv'], 'Seed:', inp['seed']))
- 
+    # Detailed output 
+    for i, output in res.items():           # Loop over g-functions
+        for j in range(len(inp['solver'])):    # Loop over solvers
+            if inp['solver'][j] in ['HLRF', 'iHLRF', 'SLSQP']:
+                subhead = '\n\n FORM results: g-func {0}\n {1}'.format(i, '-'*25)
+            else:
+                subhead = '\n\n MCS results: g-func {0}\n {1}'.format(i, '-'*25)
+            dt = [subhead]
+            dt.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
+                          'Beta:', output[j]['beta'], 'Pf:', output[j]['Pf'], 'Transform:', inp['transform'],
+                          'Solver:', inp['solver'][j]))
+            if inp['solver'][j] in ['HLRF', 'SLSQP']:
+                # FORM - additional info
+                dt.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(output[j]['nitr'])))
+                dt.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', output[j]['g_beta']))
+                dt.append(' {0:14s}{1:11.4e}\n'.format('Tolerance:', output[j]['tol']))
+                dt.append('\n {0:6s} {1:>10s} {2:>10s} {3:>10s} {4:>10s}\n {5}'.format('Var','x*','u*','alpha','a**2(%)','-'*50))
+                for k, var in enumerate(inp['vars']):
+                   lineout = [var['name'], output[j]['x_beta'][k], output[j]['u_beta'][k], output[j]['alpha'][k], output[j]['alpha'][k]**2*100]
+                   dt.append('\n {0:6s} {1:>10.3e} {2:>10.3e} {3:>10.3e} {4:>10.2f}'.format(*lineout))
+            else:
+                # Monte Carlo - additional info
+                dt.append(' {0:14s}{1:11d}\n'.format('Iterations:', inp['maxitr'][j]))
+                dt.append(' {0:14s}{1:>11.3e}\n {2:14s}{3:>11.0f}'.format('MC s.e. CoV:', output[j]['stdcv'], 'Seed:', inp['seed']))
+            pp.append(''.join(dt)) 
+    #pp.append((''.join(summ) + ''.join(gfunc) + ''.join(vs) + ''.join(cm)))
+    pp.append('\n\n Calculation Notes\n {0}\n {1}'.format('-'*17, inp['notes']))
     pp.append('\n\n{0}\n'.format('='*79))
     return ''.join(pp)
 
 
-def llfmt(longline, maxlen=78):
+def llfmt(longline, maxlen=68, shunt=9):
     """
     Format a long output line to fit within 79 character limit.
     """
@@ -164,5 +192,5 @@ def llfmt(longline, maxlen=78):
         spcix = [i for i, char in enumerate(lstr) if char==' ']
         for i in range(1, len(spcix), 1):
             if spcix[i]%maxlen < spcix[i-1]%maxlen:
-                lstr[spcix[i-1]] = '\n '
+                lstr[spcix[i-1]] = '\n' + ' '*shunt
     return ''.join(lstr)
