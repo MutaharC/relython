@@ -1,0 +1,24 @@
+{
+"notes":       "iHLRF test",
+"vars": [
+               {"name": "Cp", "dist": "norm", "params": [1, 0.1], "desc": "Pressure coeff"},
+               {"name": "c_exp", "dist": "logn", "params": [0, 0.1], "desc": "Exposure coeff"},
+               {"name": "g_fac", "dist": "logn", "params": [0, 0.1], "desc": "Gust factor"},
+               {"name": "v_nom", "dist": "norm", "params": [70, 2.5], "desc": "Nom wind spd (m/s)"},
+               {"name": "R", "dist": "norm", "params": [2000, 0.1], "desc": "Resistance (N)"},
+               {"name": "A", "dist": "norm", "params": [0.5, 0.1], "desc": "Area (m2)"}
+         ],
+"correlation": [
+                ["R", "c_exp", 0.0] 
+                ],
+"g":           ["R - (1 * c_exp * g_fac) * Cp * v_nom**2 * A"],
+"transform":   "Nataf",
+"solver":      ["SLSQP", "HLRF", "iHLRF"],
+"maxitr":      [200, 500, 500],
+"seed":        1,
+"tol":         1.0e-8,
+"ftol":        1.0e-8,
+"eps":         1.0e-8,
+"curvcheck":   0,
+"showresults": 1
+}

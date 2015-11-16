@@ -54,8 +54,8 @@ def hlrf(g, xdists, u_to_x, T, maxitr, tol, ftol, eps):
 
     msgs = []
     if d_beta > tol:
-        msgs.append('''Warning: beta convergence = {0:.2e} > {1:.2e} after 
-                     {2:d} iterations'''.format(d_beta, tol, i))
+        msgs.append("""Warning: beta convergence = {0:.2e} > {1:.2e} after 
+                     {2:d} iterations""".format(d_beta, tol, i))
     if isnan(beta):
         msgs.append('Warning: failed to converge - beta is nan')
 

@@ -38,8 +38,6 @@ def validinp(inp):
     gvarsmsg = [gvm + str(i+1) for i, vg in enumerate(vars_g) 
                 if not set(vg).issubset(set(vars_m))]
 
-    #if inp['solver'].upper() in ['CMC','ISMC','DSIM'] and 'seed' not in inp.keys():
-    #    errmsgs.append("""\n*** Specify seed in input file for CMC, ISMC and DSIM solvers""") 
     return errmsgs
 
 
@@ -128,11 +126,13 @@ def pprint(inp, cmat_x, cmat_u, res, version, author):
         vparams = [var['params'][j] if j<len(var['params']) else None for j in range(2)]
         vs.append('\n {0:6s}{1:<24s}{2:>4s}'.format(var['name'], var['desc'], var['dist']))
         vs.append(''.join('{0:>10.2e}'.format(p) if p is not None else ' '*10 for p in vparams))
-        vs.append('{0:10.2e}{1:10.2e}'.format(inp['xdists'][i].mu, inp['xdists'][i].sig))
+        if var['dist'] != 'cnst':
+            vs.append('{0:10.2e}{1:10.2e}'.format(inp['xdists'][i].mu, inp['xdists'][i].sig))
 
-    # Print correlation matrices 
+    # Print correlation matrices
+    cm = []
     if nvars <= 10: 
-        cm = ['\n\n Correlation matrix in X-space\n {0}\n      '.format(29*'-')]
+        cm.append('\n\n Correlation matrix in X-space\n {0}\n      '.format(29*'-'))
         cm.append(' '.join('{0:>7s}'.format(var['name']) for var in inp['vars']))
         for i, row in enumerate(cmat_x):
             cm.append('\n {0:6s}'.format(inp['vars'][i]['name']))
@@ -151,7 +151,7 @@ def pprint(inp, cmat_x, cmat_u, res, version, author):
     # Detailed output 
     for i, output in res.items():           # Loop over g-functions
         for j in range(len(inp['solver'])):    # Loop over solvers
-            if inp['solver'][j] in ['HLRF', 'iHLRF', 'SLSQP']:
+            if inp['solver'][j].upper() in ['HLRF', 'IHLRF', 'SLSQP']:
                 subhead = '\n\n FORM results: g-func {0}\n {1}'.format(i, '-'*25)
             else:
                 subhead = '\n\n MCS results: g-func {0}\n {1}'.format(i, '-'*25)
@@ -159,7 +159,7 @@ def pprint(inp, cmat_x, cmat_u, res, version, author):
             dt.append('\n {0:14s}{1:11.6f}\n {2:14s}{3:11.4e}\n {4:14s}{5:>11s}\n {6:14s}{7:>11s}\n'.format(
                           'Beta:', output[j]['beta'], 'Pf:', output[j]['Pf'], 'Transform:', inp['transform'],
                           'Solver:', inp['solver'][j]))
-            if inp['solver'][j] in ['HLRF', 'SLSQP']:
+            if inp['solver'][j].upper() in ['HLRF', 'IHLRF', 'SLSQP']:
                 # FORM - additional info
                 dt.append(' {0:14s}{1:11d}\n'.format('Iterations:', int(output[j]['nitr'])))
                 dt.append(' {0:14s}{1:-11.4e}\n'.format('g(x*):', output[j]['g_beta']))

@@ -34,6 +34,7 @@ def relython(inp):
         print('Parsing input...')
         gfuncs, xdists, cmat_x = io.parseinp(inp) 
         inp['xdists'] = xdists # So can show mus and sigs in pprint
+
         # Convert correlation matrix from X- to U-space
         print('Converting correlation matrix to U-space...')
         cmat_u = tr.corrmat_u(cmat_x, xdists)
@@ -48,24 +49,28 @@ def relython(inp):
                 # Direct estimation methods
                 if slvr.upper() == 'HLRF':
                     res[i].append(sl.hlrf(g, xdists, tr.u_to_x, T, 
+                                          inp['maxitr'][j], inp['tol'], 
+                                          inp['ftol'], inp['eps']))
+                elif slvr.upper() == 'IHLRF':
+                    res[i].append(sl.ihlrf(g, xdists, tr.u_to_x, T, 
                                            inp['maxitr'][j], inp['tol'], 
                                            inp['ftol'], inp['eps']))
                 elif slvr.upper() == 'SLSQP':
                     res[i].append(sl.slsqp(g, xdists, tr.u_to_x, T, 
-                                            inp['maxitr'][j], inp['tol'], 
-                                            inp['ftol'], inp['eps'])) 
+                                           inp['maxitr'][j], inp['tol'], 
+                                           inp['ftol'], inp['eps'])) 
                 # Monte Carlo simulation methods
                 elif slvr.upper() == 'CMC':
                     res[i].append(sl.cmc(g, xdists, tr.u_to_x, T, inp['seed'], 
-                                          inp['maxitr'][j]))
+                                         inp['maxitr'][j]))
                 elif slvr.upper() == 'ISMC':
                     res[i].append(sl.ismc(g, xdists, tr.u_to_x, T, inp['seed'],
-                                           inp['maxitr'][j], inp['tol'], 
-                                           inp['ftol'], inp['eps']))
+                                          inp['maxitr'][j], inp['tol'], 
+                                          inp['ftol'], inp['eps']))
                 elif slvr.upper() == 'DSIM':
                     res[i].append(sl.dsim(g, xdists, tr.u_to_x, T, inp['seed'], 
-                                           inp['maxitr'][j], inp['tol'], 
-                                           inp['ftol'], inp['eps'])) 
+                                          inp['maxitr'][j], inp['tol'], 
+                                          inp['ftol'], inp['eps'])) 
                 else:
                     continue
 

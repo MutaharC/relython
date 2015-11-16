@@ -7,3 +7,4 @@ from .gumb import gumb
 from .frch import frch
 from .unif import unif
 from .gamm import gamm
+from .cnst import cnst
